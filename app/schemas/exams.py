@@ -1,5 +1,5 @@
 from typing import Optional, List
-from datetime import date
+import datetime as dt
 from uuid import UUID
 from pydantic import Field
 from app.schemas.base import CoreModel, BaseEntitySchema
@@ -7,7 +7,7 @@ from app.models.enums import UltrasoundType, FetalPresentation
 
 class UltrasoundCreate(CoreModel):
     type: UltrasoundType = Field(..., description="Tipo de ultrassonografia realizada (obstetric, morphology, detailed).", examples=["obstetric"])
-    date: date = Field(..., description="Data em que o exame foi realizado.", examples=["2024-02-15"])
+    date: dt.date = Field(..., description="Data em que o exame foi realizado.", examples=["2024-02-15"])
     ig_weeks: int = Field(..., description="Idade gestacional calculada em semanas completas na data do exame.", examples=[24])
     presentation: Optional[FetalPresentation] = Field(None, description="Apresentação do feto no útero (cephalic, breech, transverse).", examples=["cephalic"])
     placenta_location: Optional[str] = Field(None, description="Localização anatômica da placenta no útero.", examples=["anterior"])
