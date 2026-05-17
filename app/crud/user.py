@@ -6,7 +6,26 @@ from sqlalchemy.orm import selectinload
 
 from app.models.user import User, Patient, Doctor, Secretary
 from app.models.clinic import Clinic
-from app.schemas.user import UserUpdate
+from app.schemas.user import UserUpdate, UserCreate
+from app.core.security import get_password_hash
+
+async def create_user(db: AsyncSession, user_in: UserCreate) -> User:
+    db_user = User(
+        email=user_in.email,
+        password_hash=get_password_hash(user_in.password),
+        name=user_in.name,
+        role=user_in.role,
+        clinic_id=user_in.clinic_id,
+        phone=user_in.phone,
+        avatar_url=user_in.avatar_url,
+        date_of_birth=user_in.date_of_birth,
+        is_active=True,
+        email_verified=False
+    )
+    db.add(db_user)
+    await db.commit()
+    await db.refresh(db_user)
+    return db_user
 
 async def get_user_by_id(db: AsyncSession, user_id: UUID) -> Optional[User]:
     # selectinload permite trazer as relações se necessário

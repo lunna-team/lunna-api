@@ -19,7 +19,7 @@ class User(BaseModel):
     
     # Relações
     clinic = relationship("Clinic", back_populates="users")
-    patient_profile = relationship("Patient", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    patient_profile = relationship("Patient", foreign_keys="[Patient.user_id]", back_populates="user", uselist=False, cascade="all, delete-orphan")
     doctor_profile = relationship("Doctor", back_populates="user", uselist=False, cascade="all, delete-orphan")
     secretary_profile = relationship("Secretary", back_populates="user", uselist=False, cascade="all, delete-orphan")
 

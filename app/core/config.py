@@ -10,6 +10,12 @@ class Settings(BaseSettings):
     # Security
     SECRET_KEY: str = "sua-chave-secreta-muito-segura-aqui"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    BACKEND_CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:5173",
+        "http://localhost:8080",
+    ]
     
     # Database
     DATABASE_URL: Optional[str] = None

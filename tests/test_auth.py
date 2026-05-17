@@ -9,7 +9,7 @@ import uuid
 async def test_root_endpoint(client: AsyncClient):
     response = await client.get("/")
     assert response.status_code == 200
-    assert response.json()["message"] == "Welcome to Gerar Vida API"
+    assert response.json()["message"] == "Welcome to Lunna API"
 
 @pytest.mark.asyncio
 async def test_login_success(client: AsyncClient, db_session):

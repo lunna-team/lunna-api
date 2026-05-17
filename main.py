@@ -117,20 +117,47 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+import time
+import logging
+
+# Configuração do Logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("lunna_api")
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    try:
+        response = await call_next(request)
+        process_time = (time.time() - start_time) * 1000
+        logger.info(
+            f"➡️ [REQ] {request.method} {request.url.path} | "
+            f"Status: {response.status_code} | Duracao: {process_time:.2f}ms"
+        )
+        return response
+    except Exception as e:
+        process_time = (time.time() - start_time) * 1000
+        logger.error(
+            f"❌ [ERRO] {request.method} {request.url.path} | "
+            f"Mensagem: {str(e)} | Duracao: {process_time:.2f}ms",
+            exc_info=True
+        )
+        raise e
+
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[str(origin).rstrip("/") for origin in settings.BACKEND_CORS_ORIGINS],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 @app.get("/")
-@limiter.limit("5/minute")
+@limiter.limit("50/minute")
 def root(request: Request):
     return {
-        "message": "Welcome to Gerar Vida API",
+        "message": "Welcome to Lunna API",
         "docs": "/docs",
         "version": settings.VERSION
     }
