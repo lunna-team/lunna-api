@@ -1958,6 +1958,38 @@ Guardar nome nos favoritos.
 }
 ```
 
+#### GET `/api/v1/superadmin/metrics/overview`
+Obter totais globais da plataforma (clínicas, pacientes, médicos, consultas).
+**Restrição:** Superadmin apenas.
+
+**Response (200 OK):**
+```json
+{
+  "total_clinics": 12,
+  "total_patients": 450,
+  "total_doctors": 45,
+  "total_appointments": 1200
+}
+```
+
+#### GET `/api/v1/superadmin/metrics/growth`
+Obter dados de crescimento dos últimos 30 dias para gráficos.
+**Restrição:** Superadmin apenas.
+
+**Response (200 OK):**
+```json
+{
+  "appointments_last_30_days": [
+    { "date": "2024-01-01", "count": 10 },
+    { "date": "2024-01-02", "count": 15 }
+  ],
+  "new_patients_last_30_days": [
+    { "date": "2024-01-01", "count": 2 },
+    { "date": "2024-01-02", "count": 5 }
+  ]
+}
+```
+
 #### GET `/api/v1/superadmin/clinics`
 Listar todas as clínicas do sistema.
 **Restrição:** Superadmin apenas.

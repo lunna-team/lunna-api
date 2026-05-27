@@ -120,22 +120,24 @@ src/
 
 > `✅ permitido` | `❌ negado` | `⚠️ apenas os próprios registros`
 
-| Recurso / Ação | `patient` | `doctor` | `secretary` | `admin` |
-|---|:---:|:---:|:---:|:---:|
-| Ver próprio perfil | ✅ | ✅ | ✅ | ✅ |
-| Editar próprio perfil | ✅ | ✅ | ✅ | ✅ |
-| Editar perfil de outro usuário | ❌ | ❌ | ❌ | ✅ |
-| Ver dados da clínica | ✅ | ✅ | ✅ | ✅ |
-| Listar pacientes | ⚠️ | ⚠️ | ✅ | ✅ |
-| Ver prontuário / sinais vitais | ⚠️ | ⚠️ | ❌ | ✅ |
-| Registrar sinais vitais | ✅ | ✅ | ❌ | ✅ |
-| Registrar/listar exames de USG | ⚠️ (listar) | ✅ | ❌ | ✅ |
-| Listar consultas | ⚠️ | ⚠️ | ✅ | ✅ |
-| Criar nova consulta | ❌ | ✅ | ✅ | ✅ |
-| Confirmar presença na consulta | ✅ | ❌ | ❌ | ✅ |
-| Solicitar remarcação | ✅ | ❌ | ❌ | ✅ |
-| Aprovar remarcação | ❌ | ✅ | ✅ | ✅ |
-| Cancelar consulta | ✅ | ✅ | ✅ | ✅ |
+| Recurso / Ação | `patient` | `doctor` | `secretary` | `admin` | `superadmin` |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Ver próprio perfil | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Editar próprio perfil | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Editar perfil de outro usuário | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Ver dados da clínica | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Listar pacientes | ⚠️ | ⚠️ | ✅ | ✅ | ✅ |
+| Ver prontuário / sinais vitais | ⚠️ | ⚠️ | ❌ | ✅ | ✅ |
+| Registrar sinais vitais | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Registrar/listar exames de USG | ⚠️ (listar) | ✅ | ❌ | ✅ | ✅ |
+| Listar consultas | ⚠️ | ⚠️ | ✅ | ✅ | ✅ |
+| Criar nova consulta | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Confirmar presença na consulta | ✅ | ❌ | ❌ | ✅ | ✅ |
+| Solicitar remarcação | ✅ | ❌ | ❌ | ✅ | ✅ |
+| Aprovar remarcação | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Cancelar consulta | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Gerenciar clínicas (Global) | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Ver métricas da plataforma | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 **Implementação:** criar um Higher-Order Component (HOC) / middleware de rota `withRole(allowedRoles)` que verifica o `role` do token no lado do servidor (middleware.ts do Next.js) e redireciona para `/403` se não autorizado. Aplicar também em nível de componente para ocultar botões de ação.
 
@@ -352,6 +354,25 @@ interface ThemeStore {
 - `DailyAgendaTable` — tabela do dia com todos os médicos e seus slots
 - `RescheduleQueue` — lista de solicitações pendentes com aprovação rápida inline
 - `AppointmentStatusPill` — badge visual para cada status (`pending` / `confirmed` / `reschedule_requested` / `cancelled`)
+
+---
+
+### 7.4 Portal do Superadmin (Lunna HQ)
+
+**Foco:** gestão global do ecossistema e métricas da plataforma.
+
+| Página | Rota | Recursos da API |
+|---|---|---|
+| Dashboard | `/superadmin/dashboard` | `GET /superadmin/metrics/overview`, `GET /superadmin/metrics/growth` |
+| Gestão de Clínicas | `/superadmin/clinics` | `GET /superadmin/clinics`, `POST /superadmin/clinics` |
+| Detalhe da Clínica | `/superadmin/clinics/[id]` | `GET /superadmin/clinics/[id]`, `PUT /superadmin/clinics/[id]` |
+| Meu Perfil | `/superadmin/profile` | `GET/PUT /users/{id}` |
+
+**Componentes-chave:**
+- `PlatformKPICards` — exibe totais de clínicas, pacientes, médicos e consultas.
+- `GrowthAreaChart` — gráfico de área (Recharts) comparando novos pacientes vs novas consultas nos últimos 30 dias.
+- `ClinicStatusTable` — tabela com listagem de todas as clínicas, data de cadastro e administrador vinculado.
+- `NewClinicForm` — wizard para cadastro de clínica e definição imediata do administrador inicial.
 
 ---
 

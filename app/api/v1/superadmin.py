@@ -6,9 +6,49 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_db, get_current_user, require_role
 from app.models.user import User
 from app.crud import clinic as crud_clinic
+from app.crud import metrics as crud_metrics
 from app.schemas.clinic import ClinicResponse, ClinicUpdate, ClinicWithAdminCreate
+from app.schemas.metrics import PlatformOverview, PlatformGrowthChart
 
 router = APIRouter()
+
+@router.get("/metrics/overview", response_model=PlatformOverview)
+async def get_platform_overview(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["superadmin"]))
+):
+    """
+    **Obter visão geral de métricas da plataforma.**
+
+    Retorna os totais globais de clínicas, pacientes, médicos e consultas.
+
+    ### 📌 Requisitos de Segurança
+    * Requer cabeçalho HTTP **`Authorization: Bearer <access_token>`** válido.
+    * **Restrição de Acesso**: Exclusivo para usuários com o papel **`superadmin`**.
+
+    ### 📤 Retornos esperados
+    * **`200 OK`**: JSON com os totais globais.
+    """
+    return await crud_metrics.get_platform_overview(db)
+
+@router.get("/metrics/growth", response_model=PlatformGrowthChart)
+async def get_platform_growth(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["superadmin"]))
+):
+    """
+    **Obter métricas de crescimento dos últimos 30 dias.**
+
+    Retorna séries temporais de novos pacientes e consultas realizadas nos últimos 30 dias, ideais para plotagem de gráficos.
+
+    ### 📌 Requisitos de Segurança
+    * Requer cabeçalho HTTP **`Authorization: Bearer <access_token>`** válido.
+    * **Restrição de Acesso**: Exclusivo para usuários com o papel **`superadmin`**.
+
+    ### 📤 Retornos esperados
+    * **`200 OK`**: JSON com listas de pontos de dados (data e contagem).
+    """
+    return await crud_metrics.get_platform_growth(db)
 
 @router.post("/clinics", response_model=ClinicResponse, status_code=status.HTTP_201_CREATED)
 async def create_clinic(
