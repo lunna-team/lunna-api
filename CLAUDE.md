@@ -53,7 +53,9 @@ User has three polymorphic sub-profiles linked by `user_id`:
 
 ### Roles & RBAC
 
-Defined in `app/models/enums.py::UserRole`: `patient`, `doctor`, `secretary`, `admin`. Enforce with `Depends(require_role(["doctor"]))` in route definitions.
+Defined in `app/models/enums.py::UserRole`: `patient`, `doctor`, `secretary`, `admin`, `superadmin`. Enforce with `Depends(require_role(["doctor"]))` in route definitions.
+
+`superadmin` é o único role sem `clinic_id` — a coluna é nullable exatamente por isso (migration `f1a2b3c4d5e6`). `UserResponse.clinic_id` é `Optional[UUID]`.
 
 ### Schemas vs Models
 
@@ -69,12 +71,35 @@ Defined in `app/models/enums.py::UserRole`: `patient`, `doctor`, `secretary`, `a
 
 ## Environment Setup
 
-Copy `.env.example` to `.env`. Minimum required for local dev without Docker:
+Copy `.env.example` to `.env`. Minimum required for local dev sem Docker:
 
 ```
 DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/lunna
 REDIS_URL=redis://localhost:6379
 SECRET_KEY=<any-long-random-string>
+```
+
+### Supabase (produção / staging)
+
+Usar o **session pooler** (`aws-1-sa-east-1.pooler.supabase.com:5432`), não a conexão direta (`db.<ref>.supabase.co:5432`).
+
+- A conexão direta resolve para IPv6 em algumas redes, causando timeout silencioso.
+- O transaction pooler (porta 6543) é incompatível com asyncpg (prepared statements). Usar porta 5432 do session pooler.
+- Senha com `@` deve ser URL-encoded: `@` → `%40` na DATABASE_URL.
+
+```
+DATABASE_URL=postgresql+asyncpg://postgres.<ref>:%40SuaSenha@aws-1-sa-east-1.pooler.supabase.com:5432/postgres
+```
+
+### Python version
+
+asyncpg não tem wheel para Python 3.14+. Usar **Python 3.12**:
+
+```bash
+brew install python@3.12
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ## Deployment
@@ -84,5 +109,11 @@ The API deploys to **Vercel** via `vercel.json` (routes everything through `main
 ## Key Gotchas
 
 - `alembic/env.py` uses `connect_args={"ssl": "require"}` — running migrations locally against a non-SSL DB will fail. Override by editing `env.py` temporarily or use `DATABASE_URL` pointing to a local non-SSL instance.
+- **`%` na DATABASE_URL com Alembic:** `alembic/env.py` passa a URL via `configparser`, que interpreta `%` como sintaxe de interpolação. A linha que seta a URL deve fazer `.replace("%", "%%")`:
+  ```python
+  config.set_main_option("sqlalchemy.url", settings.sqlalchemy_database_uri.replace("%", "%%"))
+  ```
+- **Múltiplos heads no Alembic:** se houver dois branches de migração, `alembic upgrade head` falha. Usar `alembic upgrade heads` (plural) ou criar uma migration de merge com `down_revision` como tupla.
 - `tests/conftest.py` imports from `app.core.dependencies` but the actual module is `app.api.dependencies` — tests may need this fixed before running.
 - Access token TTL defaults to 1440 minutes (24h); refresh token is hardcoded to 7 days in `security.py`.
+- O `seed.py` inclui criação do usuário `superadmin@lunna.app` (role `superadmin`, sem `clinic_id`). Esse usuário deve existir antes de usar o dashboard `/superadmin`.
