@@ -19,6 +19,7 @@ from app.schemas.user import (
     ProntuarioResponse,
     UserResponse,
     UserCreate,
+    PatientQuickCreate,
 )
 
 router = APIRouter()
@@ -302,41 +303,34 @@ async def get_daily_report(
     return await crud_patient.get_daily_report(db, clinic_id=clinic_id, day=day)
 
 
-@router.post("/patients", response_model=UserResponse, status_code=status.HTTP_201_CREATED, tags=["secretary"])
+@router.post("/patients", status_code=status.HTTP_201_CREATED, tags=["patients"])
 async def create_patient(
-    obj_in: UserCreate,
-    doctor_id: UUID = Query(..., description="UUID do médico responsável"),
-    prontuario: str = Query(..., description="Número do prontuário"),
-    lmp_date: date = Query(..., description="Data da última menstruação (YYYY-MM-DD)"),
-    edd: date = Query(..., description="Data provável do parto (YYYY-MM-DD)"),
+    obj_in: PatientQuickCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role(["secretary", "admin"])),
+    current_user: User = Depends(require_role(["secretary", "admin", "doctor"])),
 ):
     """
-    **Cadastrar nova paciente na clínica.**
+    **Cadastrar nova gestante.** Prontuário e senha gerados automaticamente.
+    E-mail é opcional — sem ele a gestante não consegue acessar o app.
 
-    Cria o `User` (role=patient) e o `Patient` em uma única transação.
-
-    ### 📌 Requisitos de Segurança
-    * RBAC: `secretary`, `admin`.
-
-    ### 📤 Retornos esperados
-    * **`201 CREATED`**: Usuário criado com sucesso.
+    * RBAC: `secretary`, `admin`, `doctor`.
     """
-    password_hash = get_password_hash(obj_in.password)
-    user, _patient = await crud_patient.create_patient_with_user(
+    user, patient = await crud_patient.create_patient_with_user(
         db,
         name=obj_in.name,
-        email=obj_in.email,
-        phone=obj_in.phone,
-        password_hash=password_hash,
         clinic_id=obj_in.clinic_id,
-        doctor_id=doctor_id,
-        prontuario=prontuario,
-        lmp_date=lmp_date,
-        edd=edd,
+        doctor_id=obj_in.doctor_id,
+        email=obj_in.email or None,
+        phone=obj_in.phone,
+        lmp_date=obj_in.lmp_date,
+        edd=obj_in.edd,
     )
-    return user
+    return {
+        "patient_id": str(patient.id),
+        "user_id": str(user.id),
+        "prontuario": patient.prontuario,
+        "has_email": bool(obj_in.email),
+    }
 
 
 # ── Anamnese ──────────────────────────────────────────────────────────────────

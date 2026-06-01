@@ -1,6 +1,8 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 from typing import List, Optional
 from datetime import date, timedelta
+import secrets
+import string
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, or_
@@ -213,23 +215,37 @@ async def get_daily_report(db: AsyncSession, clinic_id: UUID, day: date) -> dict
     }
 
 
+def _generate_prontuario() -> str:
+    uid = str(uuid4()).replace("-", "")[:8].upper()
+    return f"PR-{uid}"
+
+def _generate_password(length: int = 16) -> str:
+    alphabet = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alphabet) for _ in range(length))
+
 async def create_patient_with_user(
     db: AsyncSession,
     name: str,
-    email: str,
-    phone: Optional[str],
-    password_hash: str,
     clinic_id: UUID,
     doctor_id: UUID,
-    prontuario: str,
-    lmp_date: date,
-    edd: date,
+    email: Optional[str] = None,
+    phone: Optional[str] = None,
+    password_hash: Optional[str] = None,
+    prontuario: Optional[str] = None,
+    lmp_date: Optional[date] = None,
+    edd: Optional[date] = None,
 ) -> tuple[User, Patient]:
+    from app.core.security import get_password_hash
+
+    resolved_email = email or f"gestante-{uuid4().hex[:12]}@sem-email.lunna.app"
+    resolved_prontuario = prontuario or _generate_prontuario()
+    resolved_password_hash = password_hash or get_password_hash(_generate_password())
+
     user = User(
         name=name,
-        email=email,
+        email=resolved_email,
         phone=phone,
-        password_hash=password_hash,
+        password_hash=resolved_password_hash,
         clinic_id=clinic_id,
         role="patient",
     )
@@ -239,7 +255,7 @@ async def create_patient_with_user(
     patient = Patient(
         user_id=user.id,
         doctor_id=doctor_id,
-        prontuario=prontuario,
+        prontuario=resolved_prontuario,
         lmp_date=lmp_date,
         edd=edd,
     )

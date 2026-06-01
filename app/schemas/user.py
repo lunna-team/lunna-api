@@ -33,6 +33,16 @@ class UserResponse(UserBase, BaseEntitySchema):
 
 # -- Patient --
 
+class PatientQuickCreate(CoreModel):
+    """Schema para criação rápida de gestante pelo médico — email e prontuário opcionais."""
+    name: str = Field(..., description="Nome completo da gestante.")
+    email: Optional[str] = Field(None, description="E-mail da gestante (necessário para acesso ao app).")
+    phone: Optional[str] = Field(None, description="Telefone da gestante.")
+    doctor_id: UUID = Field(..., description="UUID do médico responsável.")
+    clinic_id: UUID = Field(..., description="UUID da clínica.")
+    lmp_date: Optional[dt.date] = Field(None, description="Data da Última Menstruação (DUM).")
+    edd: Optional[dt.date] = Field(None, description="Data Provável do Parto (DPP).")
+
 class PatientCreate(CoreModel):
     doctor_id: UUID = Field(..., description="Identificador único (UUID) do médico/obstetra responsável.")
     prontuario: str = Field(..., description="Número de registro ou identificador do prontuário médico na clínica.", examples=["PR-98765"])
