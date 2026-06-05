@@ -29,6 +29,35 @@ class AnamnesisBase(CoreModel):
     pre_eclampsia_anterior: Optional[bool] = False
     diabetes_gestacional_anterior: Optional[bool] = False
     perda_fetal_anterior: Optional[bool] = False
+    prematuridade_anterior: Optional[bool] = False
+    intercorrencias_anteriores: Optional[str] = None
+
+    # GESTA
+    gesta: Optional[int] = None
+    para: Optional[int] = None
+    abortos: Optional[int] = None
+    tipo_parto_anterior: Optional[str] = None
+
+    # Novas doenças pré-existentes
+    has_hiv: Optional[bool] = False
+    has_depressao_ansiedade: Optional[bool] = False
+    has_asma: Optional[bool] = False
+    has_trombofilia: Optional[bool] = False
+
+    # Antecedentes familiares adicionais
+    familiar_trombose: Optional[bool] = False
+
+    # Hábitos de vida adicionais
+    violencia_domestica: Optional[bool] = False
+    sono_qualidade: Optional[str] = None
+    estresse_nivel: Optional[str] = None
+    exposicao_ocupacional: Optional[str] = None
+
+    # Suporte social / Acompanhante
+    acompanhante_nome: Optional[str] = None
+    acompanhante_parentesco: Optional[str] = None
+    acompanhante_telefone: Optional[str] = None
+    situacao_conjugal: Optional[str] = None
 
 
 class AnamnesisCreate(AnamnesisBase):

@@ -45,5 +45,34 @@ class PatientAnamnesis(BaseModel):
     pre_eclampsia_anterior = Column(Boolean, default=False, nullable=False)
     diabetes_gestacional_anterior = Column(Boolean, default=False, nullable=False)
     perda_fetal_anterior = Column(Boolean, default=False, nullable=False)
+    prematuridade_anterior = Column(Boolean, default=False, nullable=False)
+    intercorrencias_anteriores = Column(Text, nullable=True)
+
+    # GESTA (G/P/A)
+    gesta = Column(SmallInteger, nullable=True)
+    para = Column(SmallInteger, nullable=True)
+    abortos = Column(SmallInteger, nullable=True)
+    tipo_parto_anterior = Column(String(20), nullable=True)  # 'normal' | 'cesarea' | 'ambos'
+
+    # Novas doenças pré-existentes
+    has_hiv = Column(Boolean, default=False, nullable=False)
+    has_depressao_ansiedade = Column(Boolean, default=False, nullable=False)
+    has_asma = Column(Boolean, default=False, nullable=False)
+    has_trombofilia = Column(Boolean, default=False, nullable=False)
+
+    # Antecedentes familiares adicionais
+    familiar_trombose = Column(Boolean, default=False, nullable=False)
+
+    # Hábitos de vida adicionais
+    violencia_domestica = Column(Boolean, default=False, nullable=False)
+    sono_qualidade = Column(String(20), nullable=True)  # 'boa' | 'regular' | 'ruim'
+    estresse_nivel = Column(String(20), nullable=True)  # 'baixo' | 'moderado' | 'alto'
+    exposicao_ocupacional = Column(Text, nullable=True)
+
+    # Suporte social / Acompanhante
+    acompanhante_nome = Column(String(200), nullable=True)
+    acompanhante_parentesco = Column(String(100), nullable=True)
+    acompanhante_telefone = Column(String(30), nullable=True)
+    situacao_conjugal = Column(String(30), nullable=True)  # 'casada' | 'uniao_estavel' | 'solteira' | 'outro'
 
     patient = relationship("Patient")
