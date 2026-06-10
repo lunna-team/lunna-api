@@ -39,7 +39,7 @@ async def run():
         else:
             print(f"Clinica existente: {clinic.name} (ID: {clinic.id})")
 
-        default_password_hash = get_password_hash("senha_segura123")
+        default_password_hash = get_password_hash("123456")
 
         users = [
             {
@@ -47,12 +47,12 @@ async def run():
                 "name": "Lunna Superadmin",
                 "role": UserRole.superadmin,
                 "clinic_id": None,
-                "password_hash": get_password_hash("Lunna@2026"),
+                "password_hash": get_password_hash("123456"),
                 "is_active": True,
                 "email_verified": True,
             },
             {
-                "email": "admin@gerarvida.com",
+                "email": "admin@lunna.app",
                 "name": "Admin Gerar Vida",
                 "role": UserRole.admin,
                 "clinic_id": clinic.id,
@@ -62,7 +62,7 @@ async def run():
                 "email_verified": True,
             },
             {
-                "email": "doctor@gerarvida.com",
+                "email": "medico@lunna.app",
                 "name": "Dr. Marcos Oliveira",
                 "role": UserRole.doctor,
                 "clinic_id": clinic.id,
@@ -72,7 +72,7 @@ async def run():
                 "email_verified": True,
             },
             {
-                "email": "secretary@gerarvida.com",
+                "email": "secretaria@lunna.app",
                 "name": "Ana Souza",
                 "role": UserRole.secretary,
                 "clinic_id": clinic.id,
@@ -82,7 +82,7 @@ async def run():
                 "email_verified": True,
             },
             {
-                "email": "patient@gerarvida.com",
+                "email": "paciente@lunna.app",
                 "name": "Maria da Silva",
                 "role": UserRole.patient,
                 "clinic_id": clinic.id,
